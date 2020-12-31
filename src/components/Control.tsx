@@ -17,6 +17,7 @@ const Control = ({onPress}: ControlProps) => {
       <Button onPress={onPress} title={UP_CONTROL} color="#000000" />
       <View style={styles.row}>
         <Button onPress={onPress} title={LEFT_CONTROL} color="#000000" />
+        <View style={styles.space} />
         <Button onPress={onPress} title={RIGHT_CONTROL} color="#000000" />
       </View>
       <Button onPress={onPress} title={DOWN_CONTROL} color="#000000" />
@@ -30,10 +31,13 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     position: 'absolute',
-    bottom: 100,
-    right: 50,
+    bottom: 50,
+    right: 30,
   },
   row: {
     flexDirection: 'row',
+    marginHorizontal: 20,
+    marginVertical: 20,
   },
+  space: {width: 20},
 });

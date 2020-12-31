@@ -8,7 +8,7 @@ const App = () => {
   return value.trim().length === 0 ? (
     <Welcome setValue={(text) => setValue(text)} />
   ) : (
-    <VirtualSpace name={value} />
+    <VirtualSpace name={value} onLeave={() => setValue('')} />
   );
 };
 
