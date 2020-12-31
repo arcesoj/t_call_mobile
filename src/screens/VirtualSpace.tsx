@@ -8,6 +8,7 @@ import Daily, {
 
 import {VIRTUAL_SPACE_TITLE} from '../common/constants';
 import Avatar from '../components/Avatar';
+import Movable from '../components/Movable';
 
 interface VirtualSpaceProps {
   name: string;
@@ -117,13 +118,23 @@ class VirtualSpace extends React.Component<
           meetingState={call.meetingState()}
         />
         <View>
-          {participantList.map((item) => (
-            <Avatar
-              key={item.user_id}
-              name={item.user_id}
-              isLocal={item.local}
-            />
-          ))}
+          {participantList.map((item) => {
+            return item.local ? (
+              <Movable>
+                <Avatar
+                  key={item.user_id}
+                  name={item.user_id}
+                  isLocal={item.local}
+                />
+              </Movable>
+            ) : (
+              <Avatar
+                key={item.user_id}
+                name={item.user_id}
+                isLocal={item.local}
+              />
+            );
+          })}
         </View>
       </SafeAreaView>
     );
