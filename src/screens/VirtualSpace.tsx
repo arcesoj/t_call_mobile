@@ -1,5 +1,11 @@
 import React from 'react';
-import {SafeAreaView, View, Text, StyleSheet, Button} from 'react-native';
+import {
+  SafeAreaView,
+  View,
+  Text,
+  StyleSheet,
+  TouchableNativeFeedback,
+} from 'react-native';
 import Daily, {
   DailyCall,
   DailyEvent,
@@ -30,12 +36,14 @@ const NavigationOptions = ({
   meetingState: string;
 }) => (
   <View style={styles.navigationContainer}>
-    <Button onPress={onLeave} title={'X'} color="#000000" />
+    <TouchableNativeFeedback onPress={onLeave}>
+      <Text style={styles.closeButton}>{'X'}</Text>
+    </TouchableNativeFeedback>
     <Text
       style={
         styles.title
       }>{`${VIRTUAL_SPACE_TITLE} ${name}\n${meetingState}`}</Text>
-    <Button onPress={() => {}} title={''} color="#000000" />
+    <View />
   </View>
 );
 
@@ -151,9 +159,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   navigationContainer: {
+    paddingHorizontal: 16,
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 20,
+  },
+  closeButton: {
+    fontSize: 25,
+    fontWeight: 'bold',
   },
 });
 
