@@ -1,0 +1,9 @@
+export const LEFT_CONTROL = 'LEFT';
+export const RIGHT_CONTROL = 'RIGHT';
+export const UP_CONTROL = 'UP';
+export const DOWN_CONTROL = 'DOWN';
+export const VIRTUAL_SPACE_TITLE = 'Tribe Virtual Spaces - ';
+export const WELCOME_TITLE = 'Welcome to Tribe Call';
+export const WELCOME_NAME_PLACEHOLDER = 'Type your name';
+export const WELCOME_JOIN = 'JOIN';
+export const WELCOME_ERROR_NAME = 'Name is required.';
