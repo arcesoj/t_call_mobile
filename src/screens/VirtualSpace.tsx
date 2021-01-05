@@ -11,6 +11,7 @@ import Daily, {
   DailyEvent,
   DailyParticipant,
 } from '@daily-co/react-native-daily-js';
+import Config from 'react-native-config';
 
 import {VIRTUAL_SPACE_TITLE} from '../common/constants';
 import Avatar from '../components/Avatar';
@@ -73,7 +74,7 @@ class VirtualSpace extends React.Component<
   async join() {
     // Start joining a call
     await this.state.call.join({
-      url: 'https://tchallenge.daily.co/allhands', // move to env file
+      url: Config.DAILY_URL,
     });
 
     const events: DailyEvent[] = [
