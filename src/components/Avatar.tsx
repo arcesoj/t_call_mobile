@@ -6,19 +6,17 @@ interface AvatarProps {
   isLocal: boolean;
 }
 
-const Avatar = ({name, isLocal}: AvatarProps) => {
-  return (
-    <View style={styles.container}>
-      <Image
-        source={{uri: ''}}
-        style={[
-          isLocal ? styles.image : [styles.image, {backgroundColor: 'green'}],
-        ]}
-      />
-      <Text>{name.substring(0, 7)}</Text>
-    </View>
-  );
-};
+const Avatar = ({name, isLocal}: AvatarProps) => (
+  <View style={styles.container}>
+    <Image
+      source={{uri: ''}}
+      style={[
+        isLocal ? styles.image : [styles.image, {backgroundColor: 'green'}],
+      ]}
+    />
+    <Text>{name.substring(0, 7)}</Text>
+  </View>
+);
 
 export default Avatar;
 

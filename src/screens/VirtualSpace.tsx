@@ -127,20 +127,13 @@ class VirtualSpace extends React.Component<
         />
         <View>
           {participantList.map((item) => {
-            return item.local ? (
+            const {local, user_id} = item;
+            return local ? (
               <Movable>
-                <Avatar
-                  key={item.user_id}
-                  name={item.user_id}
-                  isLocal={item.local}
-                />
+                <Avatar key={user_id} name={user_id} isLocal={local} />
               </Movable>
             ) : (
-              <Avatar
-                key={item.user_id}
-                name={item.user_id}
-                isLocal={item.local}
-              />
+              <Avatar key={user_id} name={user_id} isLocal={local} />
             );
           })}
         </View>

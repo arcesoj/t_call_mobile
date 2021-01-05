@@ -19,6 +19,11 @@ const Welcome = ({setValue}: WelcomeProps) => {
     name.trim().length === 0 ? setError(WELCOME_ERROR_NAME) : setValue(name);
   };
 
+  const onChangeText = (value: string) => {
+    setName(value);
+    setError('');
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{WELCOME_TITLE}</Text>
@@ -27,10 +32,7 @@ const Welcome = ({setValue}: WelcomeProps) => {
         value={name}
         style={styles.input}
         placeholder={WELCOME_NAME_PLACEHOLDER}
-        onChangeText={(value) => {
-          setName(value);
-          setError('');
-        }}
+        onChangeText={onChangeText}
       />
       <Button onPress={onPress} title={WELCOME_JOIN} color="#000000" />
     </View>
