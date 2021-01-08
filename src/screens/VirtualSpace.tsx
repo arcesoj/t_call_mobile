@@ -126,15 +126,15 @@ class VirtualSpace extends React.Component<
           name={this.props.name}
           meetingState={call.meetingState()}
         />
-        <View>
+        <View style={styles.virtualContainer}>
           {participantList.map((item) => {
             const {local, user_id} = item;
             return local ? (
-              <Movable>
-                <Avatar key={user_id} name={user_id} isLocal={local} />
+              <Movable key={user_id}>
+                <Avatar isLocal={local} name={user_id} />
               </Movable>
             ) : (
-              <Avatar key={user_id} name={user_id} isLocal={local} />
+              <Avatar key={user_id} isLocal={local} name={user_id} />
             );
           })}
         </View>
@@ -162,6 +162,10 @@ const styles = StyleSheet.create({
   closeButton: {
     fontSize: 25,
     fontWeight: 'bold',
+  },
+  virtualContainer: {
+    backgroundColor: 'white',
+    flex: 1,
   },
 });
 

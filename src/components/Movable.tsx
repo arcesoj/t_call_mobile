@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Animated, PanResponder} from 'react-native';
+import {Animated, PanResponder, StyleSheet} from 'react-native';
 
 interface MovableProps {}
 
@@ -74,9 +74,55 @@ class Movable extends Component<MovableProps, MovableState> {
         // to zero
         //
         this.state.animate.flattenOffset();
+        this.checkBoundaries();
       },
     });
   } // End of constructor
+
+  checkBoundaries() {
+    const MAX_X = 355;
+    const MAX_Y = 700;
+    const MIN_X = 0;
+    const MIN_Y = 0;
+
+    const {
+      top: {_value: topValue},
+      left: {_value: leftValue},
+    } = this.state.animate.getLayout();
+
+    if (topValue < MIN_Y && leftValue < MIN_X) {
+      this.state.animate.setValue({
+        x: 0,
+        y: 0,
+      });
+    }
+
+    let position = {x: leftValue, y: topValue};
+
+    if (topValue < MIN_Y || leftValue < MIN_X) {
+      if (leftValue < MIN_X) {
+        position.y = topValue;
+        position.x = MIN_X;
+      }
+      if (topValue < MIN_Y) {
+        position.y = MIN_Y;
+        position.x = leftValue;
+      }
+    }
+
+    if (topValue > MAX_Y || leftValue > MAX_X) {
+      if (topValue > MAX_Y) {
+        position.y = MAX_Y;
+        position.x = leftValue;
+      }
+
+      if (leftValue > MAX_X) {
+        position.y = topValue;
+        position.x = MAX_X;
+      }
+    }
+    this.state.animate.setValue(position);
+  }
 
   render() {
     return (
@@ -87,11 +133,20 @@ class Movable extends Component<MovableProps, MovableState> {
         // getLayout() converts {x, y} into
         // {left, top} for use in style
         //
-        style={[this.state.animate.getLayout()]}>
+        style={[styles.container, this.state.animate.getLayout()]}>
         {this.props.children}
       </Animated.View>
     );
   }
 }
+
+const styles = StyleSheet.create({
+  container: {
+    width: 70,
+    height: 70,
+    zIndex: 2,
+    padding: 5,
+  },
+});
 
 export default Movable;
