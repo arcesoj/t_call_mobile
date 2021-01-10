@@ -11,7 +11,7 @@ import Config from 'react-native-config';
 import {io} from 'socket.io-client';
 import faker from 'faker';
 
-import {VIRTUAL_SPACE_TITLE} from '../common/constants';
+import {MAX_X, MAX_Y, VIRTUAL_SPACE_TITLE} from '../common/constants';
 import Avatar from '../components/Avatar';
 import Movable from '../components/Movable';
 
@@ -28,7 +28,6 @@ interface Participant {
   y: number;
 }
 interface VirtualSpaceState {
-  participants: Map<string, Participant>;
   participantList: Participant[];
   call: DailyCall;
 }
@@ -67,7 +66,6 @@ class VirtualSpace extends React.Component<
     const call = Daily.createCallObject();
     this.socket = io(Config.NODE_SERVER);
     this.state = {
-      participants: new Map<string, Participant>(),
       participantList: [],
       call,
     };
@@ -75,38 +73,34 @@ class VirtualSpace extends React.Component<
 
   componentDidMount() {
     this.join();
-    this.socket?.on('virtual_space', (msg: any) => {
-      this.setState({participantList: msg});
-    });
   }
 
-  async componentWillUnmount() {
-    await this.state.call.leave();
-    this.socket?.emit('delete', {id: this.userId});
+  componentWillUnmount() {
+    this.leave();
   }
 
   async join() {
+    this.socket?.on('virtual_space', (msg: any) => {
+      this.setState({participantList: msg});
+    });
+
     const {call} = this.state;
+
     // Start joining a call
     const response = await call.join({
       url: Config.DAILY_URL,
     });
-
     this.userId = response?.local?.user_id;
     const photoUrl = faker.image.avatar();
 
     const newParticipant = {
       id: this.userId,
       name: this.props.name,
-      x: 0,
-      y: 0,
+      x: Math.floor(Math.random() * MAX_X),
+      y: Math.floor(Math.random() * MAX_Y),
       photoUrl,
     };
     this.socket?.emit('add', newParticipant);
-    const {participants} = this.state;
-    if (this.userId && !participants.has(this.userId)) {
-      participants.set(this.userId, newParticipant);
-    }
 
     const events: DailyEvent[] = [
       'participant-joined',
@@ -117,48 +111,41 @@ class VirtualSpace extends React.Component<
     for (const event of events) {
       // subscribe all events
       call.on(event, () => {
-        const currentParticipants: string[] = [];
-
-        // check all participants
-        for (const {user_id} of Object.values(call.participants())) {
-          currentParticipants.push(user_id);
-        }
-
-        // verify current participants
-        const keys = Array.from(participants, ([key]) => key);
-        keys.forEach((key) => {
-          if (!currentParticipants.includes(key)) {
-            participants.delete(key);
-          }
-        });
+        console.log('Daily Event :: ', event);
       });
     }
   }
 
+  async leave() {
+    await this.state.call.leave();
+    this.socket?.emit('delete', {id: this.userId});
+  }
+
   render() {
+    const {onLeave, name: participantName} = this.props;
     const {call, participantList} = this.state;
     return (
       <SafeAreaView style={styles.container}>
         <NavigationOptions
-          onLeave={this.props.onLeave}
-          name={this.props.name}
+          onLeave={onLeave}
+          name={participantName}
           meetingState={call.meetingState()}
         />
         <View style={styles.virtualContainer}>
           {participantList.map((item) => {
-            const {id, name, photoUrl} = item;
+            const {id, name, photoUrl, x, y} = item;
             const isLocal = id === this.userId;
-            return isLocal ? (
-              <Movable key={id}>
-                <Avatar isLocal={isLocal} name={name} photoUrl={photoUrl} />
-              </Movable>
-            ) : (
-              <Avatar
+            return (
+              <Movable
                 key={id}
                 isLocal={isLocal}
-                name={name}
-                photoUrl={photoUrl}
-              />
+                currentPosition={{x, y}}
+                updatePosition={({x, y}: {x: number; y: number}) => {
+                  const updateParticipant = {...item, x, y};
+                  this.socket?.emit('update', updateParticipant);
+                }}>
+                <Avatar isLocal={isLocal} name={name} photoUrl={photoUrl} />
+              </Movable>
             );
           })}
         </View>

@@ -1,7 +1,13 @@
 import React, {Component} from 'react';
 import {Animated, PanResponder, StyleSheet} from 'react-native';
 
-interface MovableProps {}
+import {MAX_X, MAX_Y, MIN_X, MIN_Y} from '../common/constants';
+
+interface MovableProps {
+  updatePosition: ({x, y}: {x: number; y: number}) => void;
+  isLocal: boolean;
+  currentPosition: {x: number; y: number};
+}
 
 interface MovableState {
   animate: Animated.ValueXY;
@@ -13,15 +19,16 @@ class Movable extends Component<MovableProps, MovableState> {
   constructor(props: MovableProps) {
     super(props);
 
+    const {x, y} = props.currentPosition;
     // Initialize state
     this.state = {
       // Create instance of Animated.XY, which interpolates
       // X and Y values
-      animate: new Animated.ValueXY(), // Inits both x and y to 0
+      animate: new Animated.ValueXY({x, y}), // Inits both x and y to 0
     };
 
     // Set value of x and y coordinate
-    this.state.animate.setValue({x: 0, y: 0});
+    // this.state.animate.setValue({x: 0, y: 0});
 
     // Initialize panResponder and configure handlers
     this._panResponder = PanResponder.create({
@@ -80,11 +87,6 @@ class Movable extends Component<MovableProps, MovableState> {
   } // End of constructor
 
   checkBoundaries() {
-    const MAX_X = 355;
-    const MAX_Y = 700;
-    const MIN_X = 0;
-    const MIN_Y = 0;
-
     const {
       top: {_value: topValue},
       left: {_value: leftValue},
@@ -122,13 +124,25 @@ class Movable extends Component<MovableProps, MovableState> {
       }
     }
     this.state.animate.setValue(position);
+    this.props.updatePosition(position);
+  }
+
+  componentDidUpdate(preProps: MovableProps, preState: MovableState) {
+    const {x, y} = preState.animate;
+    const {x: currentX, y: currentY} = this.props.currentPosition;
+    if (x._value === currentX && y._value === currentY) {
+      return;
+    }
+    this.setState({animate: new Animated.ValueXY({x: currentX, y: currentY})});
   }
 
   render() {
+    const {isLocal} = this.props;
+    const properties = isLocal ? {...this._panResponder.panHandlers} : {};
     return (
       <Animated.View
         // Pass all panHandlers to our AnimatedView
-        {...this._panResponder.panHandlers}
+        {...properties}
         //
         // getLayout() converts {x, y} into
         // {left, top} for use in style
