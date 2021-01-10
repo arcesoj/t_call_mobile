@@ -10,15 +10,18 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
-    "@daily-co/react-native-daily-js": "^0.4.0",
-    "@daily-co/react-native-webrtc": "^1.75.8",
-    "@react-native-community/async-storage": "^1.12.1",
+    "@daily-co/react-native-daily-js": "0.4.0",
+    "@daily-co/react-native-webrtc": "1.75.8",
+    "@react-native-community/async-storage": "1.12.1",
+    "faker": "5.1.0",
     "react": "16.13.1",
     "react-native": "0.63.3",
     "react-native-background-timer": "2.4.1",
-    "react-native-config": "1.4.1"
+    "react-native-config": "1.4.1",
+    "socket.io-client": "3.0.5"
   },
   "devDependencies": {
+    "@types/faker": "^5.1.5",
     "@babel/core": "^7.8.4",
     "@babel/runtime": "^7.8.4",
     "@react-native-community/eslint-config": "^1.1.0",

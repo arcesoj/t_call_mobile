@@ -4,12 +4,13 @@ import {Image, StyleSheet, Text, View} from 'react-native';
 interface AvatarProps {
   name: string;
   isLocal: boolean;
+  photoUrl: string;
 }
 
-const Avatar = ({name, isLocal}: AvatarProps) => (
+const Avatar = ({name, isLocal, photoUrl}: AvatarProps) => (
   <View style={styles.container}>
     <Image
-      source={{uri: ''}}
+      source={{uri: photoUrl}}
       style={[
         isLocal ? styles.image : [styles.image, {backgroundColor: 'green'}],
       ]}

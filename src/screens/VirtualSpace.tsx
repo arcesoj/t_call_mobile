@@ -6,12 +6,10 @@ import {
   StyleSheet,
   TouchableNativeFeedback,
 } from 'react-native';
-import Daily, {
-  DailyCall,
-  DailyEvent,
-  DailyParticipant,
-} from '@daily-co/react-native-daily-js';
+import Daily, {DailyCall, DailyEvent} from '@daily-co/react-native-daily-js';
 import Config from 'react-native-config';
+import {io} from 'socket.io-client';
+import faker from 'faker';
 
 import {VIRTUAL_SPACE_TITLE} from '../common/constants';
 import Avatar from '../components/Avatar';
@@ -21,9 +19,17 @@ interface VirtualSpaceProps {
   name: string;
   onLeave: () => void;
 }
+
+interface Participant {
+  name: string;
+  id: string;
+  photoUrl: string;
+  x: number;
+  y: number;
+}
 interface VirtualSpaceState {
-  participants: Map<string, DailyParticipant>;
-  participantList: DailyParticipant[];
+  participants: Map<string, Participant>;
+  participantList: Participant[];
   call: DailyCall;
 }
 
@@ -52,12 +58,16 @@ class VirtualSpace extends React.Component<
   VirtualSpaceProps,
   VirtualSpaceState
 > {
+  socket: any;
+  userId?: string;
+
   constructor(props: VirtualSpaceProps) {
     super(props);
 
     const call = Daily.createCallObject();
+    this.socket = io(Config.NODE_SERVER);
     this.state = {
-      participants: new Map<string, DailyParticipant>(),
+      participants: new Map<string, Participant>(),
       participantList: [],
       call,
     };
@@ -65,17 +75,38 @@ class VirtualSpace extends React.Component<
 
   componentDidMount() {
     this.join();
+    this.socket?.on('virtual_space', (msg: any) => {
+      this.setState({participantList: msg});
+    });
   }
 
-  componentWillUnmount() {
-    this.state.call.leave();
+  async componentWillUnmount() {
+    await this.state.call.leave();
+    this.socket?.emit('delete', {id: this.userId});
   }
 
   async join() {
+    const {call} = this.state;
     // Start joining a call
-    await this.state.call.join({
+    const response = await call.join({
       url: Config.DAILY_URL,
     });
+
+    this.userId = response?.local?.user_id;
+    const photoUrl = faker.image.avatar();
+
+    const newParticipant = {
+      id: this.userId,
+      name: this.props.name,
+      x: 0,
+      y: 0,
+      photoUrl,
+    };
+    this.socket?.emit('add', newParticipant);
+    const {participants} = this.state;
+    if (this.userId && !participants.has(this.userId)) {
+      participants.set(this.userId, newParticipant);
+    }
 
     const events: DailyEvent[] = [
       'participant-joined',
@@ -85,20 +116,12 @@ class VirtualSpace extends React.Component<
 
     for (const event of events) {
       // subscribe all events
-      this.state.call.on(event, () => {
+      call.on(event, () => {
         const currentParticipants: string[] = [];
-        const {participants} = this.state;
 
         // check all participants
-        for (const participant of Object.values(
-          this.state.call.participants(),
-        )) {
-          currentParticipants.push(participant.user_id);
-
-          // add new participant
-          if (!participants.has(participant.user_id)) {
-            participants.set(participant.user_id, participant);
-          }
+        for (const {user_id} of Object.values(call.participants())) {
+          currentParticipants.push(user_id);
         }
 
         // verify current participants
@@ -107,11 +130,6 @@ class VirtualSpace extends React.Component<
           if (!currentParticipants.includes(key)) {
             participants.delete(key);
           }
-        });
-
-        this.setState({
-          participants: participants,
-          participantList: Array.from(participants, ([, value]) => value),
         });
       });
     }
@@ -128,13 +146,19 @@ class VirtualSpace extends React.Component<
         />
         <View style={styles.virtualContainer}>
           {participantList.map((item) => {
-            const {local, user_id} = item;
-            return local ? (
-              <Movable key={user_id}>
-                <Avatar isLocal={local} name={user_id} />
+            const {id, name, photoUrl} = item;
+            const isLocal = id === this.userId;
+            return isLocal ? (
+              <Movable key={id}>
+                <Avatar isLocal={isLocal} name={name} photoUrl={photoUrl} />
               </Movable>
             ) : (
-              <Avatar key={user_id} isLocal={local} name={user_id} />
+              <Avatar
+                key={id}
+                isLocal={isLocal}
+                name={name}
+                photoUrl={photoUrl}
+              />
             );
           })}
         </View>
